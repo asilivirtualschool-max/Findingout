@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finding Out: Body Systems Expedition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700;800&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#20262b;
+    --paper:#eee3c8;
+    --paper-dark:#e2d3ad;
+    --bg:#16262a;
+    --bg-2:#1d3339;
+    --line: rgba(32,38,43,0.16);
+    --accent:#1F6F8B;
+    --accent-soft: rgba(31,111,139,0.14);
+    --good:#3f7d4a;
+    --warn:#b4720d;
+    --bad:#a53b3b;
+    --paper-shadow: 0 18px 40px -20px rgba(0,0,0,0.55);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 15% -10%, #234a4f 0%, transparent 60%),
+      radial-gradient(900px 500px at 110% 10%, #1a3a3d 0%, transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+    padding:24px 16px 60px;
+  }
+  .app{
+    max-width:920px;
+    margin:0 auto;
+  }
+  .masthead{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    color:#eef3f2;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+  }
+  .masthead h1{
+    font-family:'Bitter', serif;
+    font-weight:800;
+    font-size:clamp(1.5rem, 4vw, 2.15rem);
+    margin:0 0 4px;
+    letter-spacing:-0.01em;
+    line-height:1.05;
+  }
+  .masthead p{
+    margin:0;
+    color:#a9c2bf;
+    font-size:0.95rem;
+    max-width:46ch;
+  }
+  .stamp{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.72rem;
+    color:#7fb8ae;
+    border:1px solid rgba(127,184,174,0.4);
+    padding:5px 10px;
+    border-radius:3px;
+    white-space:nowrap;
+    transform:rotate(-1.5deg);
+  }
+
+  /* stepper */
+  .stepper{
+    display:flex;
+    gap:6px;
+    margin-bottom:18px;
+    overflow-x:auto;
+    padding-bottom:4px;
+  }
+  .step-btn{
+    flex:1 1 0;
+    min-width:88px;
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.1);
+    color:#8fa6a3;
+    font-family:'Work Sans', sans-serif;
+    font-size:0.72rem;
+    font-weight:600;
+    padding:8px 6px;
+    border-radius:8px;
+    cursor:not-allowed;
+    text-align:center;
+    line-height:1.25;
+    transition:all .15s ease;
+  }
+  .step-btn .num{
+    display:block;
+    font-family:'Bitter', serif;
+    font-size:0.95rem;
+    margin-bottom:2px;
+  }
+  .step-btn.reachable{cursor:pointer; color:#cfe3e0;}
+  .step-btn.reachable:hover{background:rgba(255,255,255,0.1);}
+  .step-btn.current{
+    background:#eef3f2;
+    color:#16262a;
+    border-color:#eef3f2;
+  }
+  .step-btn.done{
+    color:#7fb8ae;
+    border-color:rgba(127,184,174,0.35);
+  }
+
+  /* paper card */
+  .card{
+    background:var(--paper);
+    background-image: linear-gradient(var(--paper), var(--paper));
+    border-radius:6px;
+    box-shadow:var(--paper-shadow);
+    padding:28px 26px 26px;
+    position:relative;
+    border:1px solid rgba(32,38,43,0.08);
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    top:0; left:22px; right:22px; height:6px;
+    background:repeating-linear-gradient(90deg, rgba(32,38,43,0.14) 0 2px, transparent 2px 10px);
+    opacity:0.5;
+  }
+  @media (min-width:640px){
+    .card{padding:34px 40px 34px;}
+  }
+
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.72rem;
+    color: var(--accent);
+    margin:0 0 6px;
+  }
+  h2.title{
+    font-family:'Bitter', serif;
+    font-weight:700;
+    font-size:clamp(1.35rem, 3.2vw, 1.75rem);
+    margin:0 0 10px;
+    line-height:1.15;
+  }
+  .lede{
+    font-size:1rem;
+    line-height:1.55;
+    color:#3c4247;
+    max-width:64ch;
+    margin:0 0 22px;
+  }
+  hr.rule{
+    border:none;
+    border-top:1px dashed var(--line);
+    margin:22px 0;
+  }
+
+  /* buttons */
+  .btn{
+    font-family:'Work Sans', sans-serif;
+    font-weight:600;
+    font-size:0.92rem;
+    padding:11px 20px;
+    border-radius:6px;
+    border:none;
+    cursor:pointer;
+    transition:transform .1s ease, box-shadow .15s ease;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{
+    background:var(--ink);
+    color:#f3ece0;
+  }
+  .btn-primary:hover{box-shadow:0 6px 16px -8px rgba(0,0,0,0.5);}
+  .btn-primary:disabled{
+    background:#b6b0a0; color:#8b8577; cursor:not-allowed; box-shadow:none;
+  }
+  .btn-ghost{
+    background:transparent;
+    color:var(--ink);
+    border:1.5px solid var(--ink);
+  }
+  .btn-ghost:hover{background:rgba(32,38,43,0.06);}
+  .btn-small{padding:7px 13px; font-size:0.82rem; border-radius:5px;}
+
+  .nav-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:26px;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+
+  /* group + role cards */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(190px, 1fr));
+    gap:12px;
+    margin-bottom:20px;
+  }
+  .pick-card{
+    text-align:left;
+    background:#f6f0df;
+    border:2px solid transparent;
+    border-radius:8px;
+    padding:14px 15px;
+    cursor:pointer;
+    transition:all .15s ease;
+    font-family:'Work Sans', sans-serif;
+    color:var(--ink);
+  }
+  .pick-card:hover{transform:translateY(-2px); box-shadow:0 10px 20px -14px rgba(0,0,0,0.4);}
+  .pick-card.selected{border-color: var(--card-accent, var(--accent)); background:#fbf7ea;}
+  .pick-card .dot{
+    width:11px; height:11px; border-radius:50%;
+    background:var(--card-accent, var(--accent));
+    display:inline-block; margin-bottom:8px;
+  }
+  .pick-card .pname{
+    font-family:'Bitter', serif;
+    font-weight:700;
+    font-size:1.02rem;
+    display:block;
+    margin-bottom:4px;
+  }
+  .pick-card .ptag{
+    font-size:0.85rem;
+    color:#565c60;
+    line-height:1.4;
+  }
+
+  .callout{
+    background:var(--accent-soft);
+    border-left:3px solid var(--accent);
+    padding:12px 15px;
+    border-radius:0 6px 6px 0;
+    font-size:0.9rem;
+    line-height:1.5;
+    margin:16px 0;
+  }
+  .bonus{
+    margin-top:18px;
+    background:#efe4c3;
+    border:1px dashed #a68c4f;
+    border-radius:8px;
+    padding:14px 16px;
+    font-size:0.88rem;
+    line-height:1.5;
+  }
+  .bonus b{font-family:'Bitter', serif;}
+
+  /* learn stage skill blocks */
+  .skill-block{
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:16px 18px;
+    margin-bottom:14px;
+    background:rgba(255,255,255,0.35);
+  }
+  .skill-block h3{
+    font-family:'Bitter', serif;
+    font-size:1.08rem;
+    margin:0 0 6px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .skill-num{
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.75rem;
+    background:var(--ink);
+    color:#f3ece0;
+    width:22px; height:22px;
+    border-radius:50%;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+  }
+  .skill-block p{margin:0 0 10px; font-size:0.92rem; line-height:1.55; color:#3c4247;}
+  .quiz{
+    background:rgba(32,38,43,0.04);
+    border-radius:6px;
+    padding:10px 13px;
+  }
+  .quiz .q{font-size:0.85rem; font-weight:600; margin-bottom:8px;}
+  .quiz-opt{
+    display:block;
+    width:100%;
+    text-align:left;
+    background:#fff;
+    border:1.5px solid var(--line);
+    border-radius:5px;
+    padding:8px 11px;
+    margin-bottom:6px;
+    font-size:0.85rem;
+    cursor:pointer;
+    font-family:'Work Sans', sans-serif;
+    color:var(--ink);
+  }
+  .quiz-opt:hover{border-color:var(--accent);}
+  .quiz-opt.correct{background:#e4f0e5; border-color:var(--good); color:#22492a;}
+  .quiz-opt.incorrect{background:#f4e5e5; border-color:var(--bad); color:#5a2222;}
+  .quiz-fb{font-size:0.82rem; margin-top:6px; font-weight:600;}
+  .quiz-fb.good{color:var(--good);}
+  .quiz-fb.bad{color:var(--bad);}
+
+  .paraphrase-compare{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+    margin:10px 0;
+  }
+  @media (min-width:560px){ .paraphrase-compare{grid-template-columns:1fr 1fr;} }
+  .pp-box{
+    border-radius:6px;
+    padding:11px 13px;
+    font-size:0.85rem;
+    line-height:1.5;
+  }
+  .pp-box.no{background:#f4e5e5; border:1px solid #d9b3b3;}
+  .pp-box.yes{background:#e4f0e5; border:1px solid #b7d4bb;}
+  .pp-label{font-family:'JetBrains Mono', monospace; font-size:0.68rem; display:block; margin-bottom:5px; font-weight:700;}
+  .pp-box.no .pp-label{color:var(--bad);}
+  .pp-box.yes .pp-label{color:var(--good);}
+
+  /* form elements */
+  label.field-label{
+    display:block;
+    font-size:0.82rem;
+    font-weight:600;
+    margin-bottom:5px;
+    color:#3c4247;
+  }
+  input[type=text], input[type=number], textarea{
+    width:100%;
+    font-family:'Work Sans', sans-serif;
+    font-size:0.92rem;
+    padding:9px 11px;
+    border-radius:5px;
+    border:1.5px solid var(--line);
+    background:#fffdf8;
+    color:var(--ink);
+    resize:vertical;
+  }
+  input:focus, textarea:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent);}
+  textarea.flagged{border-color:var(--warn); background:#fbf3e2;}
+  .field{margin-bottom:14px;}
+  .field-row{display:grid; grid-template-columns:1fr; gap:12px;}
+  @media (min-width:560px){ .field-row.two{grid-template-columns:1fr 1fr;} .field-row.three{grid-template-columns:1fr 1fr 1fr;} }
+  .hint{font-size:0.78rem; color:#6b6155; margin-top:5px; line-height:1.4;}
+  .warn-banner{
+    background:#fbeccb;
+    border:1px solid var(--warn);
+    color:#5c3f08;
+    border-radius:6px;
+    padding:9px 12px;
+    font-size:0.82rem;
+    margin-top:8px;
+    line-height:1.45;
+  }
+  .check-row{
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    font-size:0.82rem;
+    margin-top:6px;
+  }
+  .check-row input{width:auto; margin-top:3px;}
+
+  /* timer */
+  .timer-panel{
+    background:#16262a;
+    color:#eef3f2;
+    border-radius:10px;
+    padding:22px 20px;
+    text-align:center;
+    margin-bottom:22px;
+  }
+  .timer-display{
+    font-family:'JetBrains Mono', monospace;
+    font-size:clamp(2.6rem, 10vw, 3.6rem);
+    font-weight:500;
+    letter-spacing:0.02em;
+    margin:6px 0 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .timer-display.urgent{color:#e08a6b;}
+  .timer-display.done{color:#7fb8ae;}
+  .preset-row{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:14px;}
+  .preset-btn{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.18);
+    color:#cfe3e0;
+    padding:7px 14px;
+    border-radius:20px;
+    font-size:0.82rem;
+    cursor:pointer;
+    font-family:'Work Sans', sans-serif;
+  }
+  .preset-btn.active{background:#eef3f2; color:#16262a; border-color:#eef3f2;}
+  .timer-controls{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+  .timer-controls .btn{padding:9px 18px;}
+  .timer-note{font-size:0.78rem; color:#9db9b5; margin-top:12px;}
+
+  /* fact cards */
+  .fact-card{
+    border:1.5px solid var(--line);
+    border-radius:8px;
+    padding:14px 16px;
+    margin-bottom:12px;
+    background:rgba(255,255,255,0.4);
+  }
+  .fact-card .fc-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:8px;}
+  .fc-source{font-size:0.78rem; color:#6b6155; font-family:'JetBrains Mono', monospace;}
+  .fc-text{font-size:0.92rem; line-height:1.5; margin-bottom:10px;}
+  .status-dot{width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-top:4px;}
+  .status-dot.green{background:var(--good);}
+  .status-dot.amber{background:var(--warn);}
+  .status-dot.gray{background:#a29c8c;}
+  .rel-checks{display:flex; flex-wrap:wrap; gap:12px; font-size:0.78rem;}
+  .rel-checks label{display:flex; align-items:center; gap:5px; cursor:pointer;}
+  .rel-checks input{width:auto;}
+  .fc-remove{
+    background:none; border:none; color:#a53b3b; font-size:0.75rem; cursor:pointer; text-decoration:underline; padding:0;
+  }
+  .progress-bar-outer{
+    background:rgba(32,38,43,0.1);
+    border-radius:20px;
+    height:9px;
+    overflow:hidden;
+    margin:10px 0 4px;
+  }
+  .progress-bar-inner{
+    height:100%;
+    background:var(--accent);
+    border-radius:20px;
+    transition:width .3s ease;
+  }
+  .progress-label{font-size:0.78rem; color:#6b6155;}
+
+  /* checklist gate */
+  .gate-list{list-style:none; padding:0; margin:0 0 18px;}
+  .gate-list li{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:10px 4px;
+    border-bottom:1px solid var(--line);
+    font-size:0.92rem;
+  }
+  .gate-list li:last-child{border-bottom:none;}
+  .gate-list input{width:auto; margin-top:3px; flex-shrink:0;}
+
+  .evidence-bank{
+    background:#e9dfc4;
+    border:1px solid #c9b98a;
+    border-radius:8px;
+    padding:14px 16px;
+    max-height:260px;
+    overflow-y:auto;
+    font-size:0.85rem;
+    line-height:1.6;
+    margin-bottom:8px;
+    user-select:none;
+  }
+  .evidence-bank .eb-item{margin-bottom:10px;}
+  .evidence-bank .eb-item b{font-family:'Bitter', serif;}
+
+  .recap-grid{display:grid; grid-template-columns:1fr; gap:14px; margin-bottom:18px;}
+  @media (min-width:560px){ .recap-grid{grid-template-columns:1fr 1fr;} }
+  .recap-block{background:rgba(255,255,255,0.4); border:1px solid var(--line); border-radius:8px; padding:13px 15px;}
+  .recap-block h4{font-family:'Bitter', serif; font-size:0.85rem; margin:0 0 6px; color:#565c60;}
+  .recap-block p, .recap-block div{font-size:0.9rem; margin:0; line-height:1.5;}
+
+  .tag-badge{
+    display:inline-block;
+    font-family:'JetBrains Mono', monospace;
+    font-size:0.68rem;
+    padding:3px 8px;
+    border-radius:20px;
+    background:var(--card-accent, var(--accent));
+    color:#fff;
+  }
+
+  ::selection{ background: rgba(31,111,139,0.25); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="masthead">
+    <div>
+      <h1>Finding Out: Body Systems Expedition</h1>
+      <p>Your field research journal for the "Finding Out" stage of the inquiry.</p>
+    </div>
+    <div class="stamp" id="mastheadStamp">FILE: UNASSIGNED</div>
+  </div>
+
+  <div class="stepper" id="stepper"></div>
+
+  <div class="card" id="stageCard"></div>
+</div>
+
+<script>
+/* ============ DATA ============ */
+const GROUPS = [
+  { id:'circulatory', name:'Circulatory System', color:'#B03A2E',
+    tag:'Pumps blood, oxygen and nutrients through kilometres of vessels.',
+    bigQ:'How does the circulatory system keep the whole body supplied with what it needs?' },
+  { id:'digestive', name:'Digestive System', color:'#C9800C',
+    tag:'Breaks food down into fuel the body can actually use.',
+    bigQ:'How does the digestive system turn food into energy for the body?' },
+  { id:'respiratory', name:'Respiratory System', color:'#1F6F8B',
+    tag:'Brings in oxygen and clears out carbon dioxide, breath by breath.',
+    bigQ:'How does the respiratory system get oxygen into the body?' },
+  { id:'musculoskeletal', name:'Musculoskeletal System', color:'#8C6A2F',
+    tag:'Bones and muscles team up to hold you up and move you around.',
+    bigQ:'How do bones and muscles work together to move the body?' },
+  { id:'nervous', name:'Nervous System', color:'#6B4E9E',
+    tag:'Sends messages at lightning speed to control the whole body.',
+    bigQ:'How does the nervous system control and coordinate the body?' }
+];
+
+const ROLES = [
+  { id:'a', label:'Structure Investigator',
+    desc:"Find the main parts of the system and how they're built. Relate the structure back to the job the system does." },
+  { id:'b', label:'Function Investigator',
+    desc:'Find out what the system actually does — the main processes it uses, and how it gets that job done.' },
+  { id:'c', label:'Connections Investigator',
+    desc:'Find out how the system works together with other body systems — and whether it depends on them to function.' }
+];
+
+const SKILLS = [
+  { title:'Question & Plan',
+    body:"Real investigators start with a question that actually needs researching — not one you can answer with a single word.",
+    quiz:{ q:'Which is the stronger research question?',
+      options:['Are bones hard?', "How do bones and muscles work together to let you jump?"],
+      correct:1,
+      good:"Right — it needs real investigating, not a yes-or-no guess.",
+      bad:"Try again — that one can be answered with a single word, so there's nothing left to investigate." } },
+  { title:'Locate & Collect',
+    body:'Gather information from more than one place — books, diagrams, videos, trustworthy websites. Use primary sources (things you observe or hear directly) as well as secondary sources (books, articles, websites) when you can.',
+    quiz:{ q:'You want to know how fast a heart beats. What is a primary source you could use?',
+      options:['A textbook paragraph about the heart', 'Actually taking your own pulse and timing it'],
+      correct:1,
+      good:'Exactly — you collected that data yourself, first-hand.',
+      bad:"Not quite — a textbook paragraph is a secondary source. Someone else already collected and wrote it up." } },
+  { title:'Evaluate',
+    body:'Before you trust a source, check who made it and when. A page with no author and no date is much harder to trust than one from a museum, hospital or textbook.',
+    quiz:{ q:'Which source would you trust more for facts about the heart?',
+      options:['An anonymous post with no author or date', "A children's science museum page, updated this year"],
+      correct:1,
+      good:"Good call — you can check who wrote it and when, which makes it easier to trust.",
+      bad:"Careful — with no author or date, you can't check who made this claim or how current it is." } },
+  { title:'Analyze & Synthesize',
+    body:'Sort your facts instead of listing them randomly. Which ones are about structure? Which are about function? Grouping similar facts together makes patterns easier to see.',
+    quiz:{ q:'You have ten facts about your system in a messy pile. What should you do before presenting?',
+      options:['Present them in the order you found them', 'Group them by theme — structure, function, connections'],
+      correct:1,
+      good:'Yes — grouped facts tell a clearer story than a random list.',
+      bad:"That would be hard for your audience to follow — try grouping related facts together first." } },
+  { title:'Communicate & Cite',
+    body:"Say where every fact came from. Citing your sources honestly is part of being a principled researcher — and it lets other people check your work.",
+    quiz:{ q:"You found a great fact in a book. What should you record alongside it?",
+      options:['Nothing — just the fact is enough', 'The title, author or organisation, and date'],
+      correct:1,
+      good:"Right — that's exactly what lets you (and anyone else) trace the fact back to its source.",
+      bad:"Without a source record, nobody — including future you — can check where that fact came from." } }
+];
+
+const GATE_ITEMS = [
+  "I can teach others about my topic.",
+  "I can explain how my facts connect to our unit concepts.",
+  "I have a clear answer to my big research question.",
+  "I could answer someone else's questions about my topic.",
+  "More than one source gave the same answer to my questions.",
+  "My sources are relevant and reliable.",
+  "I found the same answers in more than one source.",
+  "I can confidently say where each of my facts came from."
+];
+
+const STAGES = [
+  { id:'brief', label:'Mission Brief' },
+  { id:'learn', label:'Learn to Research' },
+  { id:'question', label:'Ask Your Question' },
+  { id:'investigate', label:'Investigate' },
+  { id:'check', label:'Check Evidence' },
+  { id:'summarize', label:'Build Summary' },
+  { id:'ready', label:'Ready to Present' }
+];
+
+/* ============ STATE ============ */
+let state = {
+  stageIndex: 0,
+  maxReached: 0,
+  group: null,
+  role: null,
+  questions: [ {text:'', concept:null, partner:''}, {text:'', concept:null, partner:''}, {text:'', concept:null, partner:''} ],
+  quizAnswered: {},          // skill title -> bool correct chosen
+  facts: [],                 // {id, title, author, date, text, r1,r2,r3, pasteFlag, confirmed}
+  gate: {},                  // index -> bool
+  timer: { total:0, remaining:0, running:false, intervalId:null, context:'' },
+  summaryText: '',
+  summaryPasteFlag: false,
+  summaryConfirmed: false,
+  images: [ {desc:'', source:''}, {desc:'', source:''} ]
+};
+let factIdCounter = 1;
+let audioCtx = null;
+
+function group(){ return GROUPS.find(g => g.id === state.group); }
+
+/* ============ RENDER ROOT ============ */
+function render(){
+  renderStepper();
+  renderStage();
+  const g = group();
+  document.getElementById('mastheadStamp').textContent = g
+    ? `FILE: ${g.name.toUpperCase()} · ROLE ${state.role ? state.role.toUpperCase() : '?'}`
+    : 'FILE: UNASSIGNED';
+  document.documentElement.style.setProperty('--accent', g ? g.color : '#1F6F8B');
+  document.documentElement.style.setProperty('--accent-soft', g ? hexToSoft(g.color) : 'rgba(31,111,139,0.14)');
+}
+
+function hexToSoft(hex){
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},0.14)`;
+}
+
+function renderStepper(){
+  const el = document.getElementById('stepper');
+  el.innerHTML = STAGES.map((s,i) => {
+    let cls = 'step-btn';
+    if(i === state.stageIndex) cls += ' current';
+    else if(i < state.maxReached) cls += ' done reachable';
+    else if(i === state.maxReached) cls += ' reachable';
+    return `<button class="${cls}" data-goto="${i}" ${i>state.maxReached?'disabled':''}>
+      <span class="num">${i+1}</span>${s.label}
+    </button>`;
+  }).join('');
+  el.querySelectorAll('.step-btn.reachable').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      state.stageIndex = parseInt(btn.dataset.goto,10);
+      render();
+    });
+  });
+}
+
+function goTo(i){
+  state.stageIndex = i;
+  if(i > state.maxReached) state.maxReached = i;
+  window.scrollTo({top:0, behavior:'smooth'});
+  render();
+}
+
+/* ============ STAGE ROUTER ============ */
+function renderStage(){
+  const card = document.getElementById('stageCard');
+  const id = STAGES[state.stageIndex].id;
+  if(id === 'brief') card.innerHTML = briefHTML();
+  else if(id === 'learn') card.innerHTML = learnHTML();
+  else if(id === 'question') card.innerHTML = questionHTML();
+  else if(id === 'investigate') card.innerHTML = investigateHTML();
+  else if(id === 'check') card.innerHTML = checkHTML();
+  else if(id === 'summarize') card.innerHTML = summarizeHTML();
+  else if(id === 'ready') card.innerHTML = readyHTML();
+  attachStageEvents(id);
+}
+
+/* ============ STAGE: BRIEF ============ */
+function briefHTML(){
+  return `
+    <p class="eyebrow">Stage 1 of 7 · Mission Brief</p>
+    <h2 class="title">Choose your expert group and role</h2>
+    <p class="lede">Your class is investigating the human body. Five expert groups are each digging into one system. Pick your system, then pick your role within it — you'll carry both with you through the whole investigation.</p>
+
+    <label class="field-label">Your expert group</label>
+    <div class="grid" id="groupGrid">
+      ${GROUPS.map(g => `
+        <button class="pick-card ${state.group===g.id?'selected':''}" style="--card-accent:${g.color}" data-group="${g.id}">
+          <span class="dot"></span>
+          <span class="pname">${g.name}</span>
+          <span class="ptag">${g.tag}</span>
+        </button>`).join('')}
+    </div>
+
+    <label class="field-label">Your role in the group</label>
+    <div class="grid" id="roleGrid">
+      ${ROLES.map(r => `
+        <button class="pick-card ${state.role===r.id?'selected':''}" style="--card-accent:${group()?group().color:'#1F6F8B'}" data-role="${r.id}">
+          <span class="pname">${r.label}</span>
+          <span class="ptag">${r.desc}</span>
+        </button>`).join('')}
+    </div>
+
+    ${group() ? `<div class="callout">Your group's big question: <b>${group().bigQ}</b></div>` : ''}
+
+    <div class="bonus">
+      <b>Bonus wondering:</b> Is your system the same in a firefighter, an astronaut and your mum? How might their systems work extra hard — or need extra care — compared to yours? Keep this in your back pocket for later.
+    </div>
+
+    <div class="nav-row">
+      <span></span>
+      <button class="btn btn-primary" id="briefNext" ${(state.group && state.role) ? '' : 'disabled'}>Begin the expedition &rarr;</button>
+    </div>
+  `;
+}
+
+/* ============ STAGE: LEARN ============ */
+function learnHTML(){
+  return `
+    <p class="eyebrow">Stage 2 of 7 · Learn to Research</p>
+    <h2 class="title">How investigators work</h2>
+    <p class="lede">Before you head into the field, run through the five moves every good researcher makes. Answer the quick check under each one.</p>
+
+    ${SKILLS.map((s,i) => {
+      const answered = state.quizAnswered[i];
+      return `
+      <div class="skill-block">
+        <h3><span class="skill-num">${i+1}</span>${s.title}</h3>
+        <p>${s.body}</p>
+        <div class="quiz" data-skill="${i}">
+          <div class="q">${s.quiz.q}</div>
+          ${s.quiz.options.map((opt,oi) => {
+            let cls = 'quiz-opt';
+            if(answered !== undefined){
+              if(oi === s.quiz.correct) cls += ' correct';
+              else if(oi === answered && answered !== s.quiz.correct) cls += ' incorrect';
+            }
+            return `<button class="${cls}" data-opt="${oi}" data-skill="${i}" ${answered!==undefined?'disabled':''}>${opt}</button>`;
+          }).join('')}
+          ${answered !== undefined ? `<div class="quiz-fb ${answered===s.quiz.correct?'good':'bad'}">${answered===s.quiz.correct ? s.quiz.good : s.quiz.bad}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('')}
+
+    <hr class="rule">
+    <h3 style="font-family:'Bitter',serif; font-size:1.05rem; margin:0 0 8px;">Paraphrasing vs. copying</h3>
+    <p class="lede" style="margin-bottom:10px;">Changing a word or two is still copying. Paraphrasing means putting the idea in genuinely different words.</p>
+    <div class="paraphrase-compare">
+      <div class="pp-box no"><span class="pp-label">NOT OK — copied</span>The heart pumps blood through the whole body.</div>
+      <div class="pp-box yes"><span class="pp-label">OK — paraphrased</span>Blood gets pushed all around the body because the heart keeps squeezing.</div>
+    </div>
+    <p class="hint">Keep this in mind — every note you write later in this workbook needs to pass the same test.</p>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" id="learnBack">&larr; Back</button>
+      <button class="btn btn-primary" id="learnNext">Continue to my question &rarr;</button>
+    </div>
+  `;
+}
+
+/* ============ STAGE: QUESTION ============ */
+const RELATED_CONCEPTS = {
+  a: [
+    { name:'Form', hint:'Form is about what something is like — its parts, shape and properties.',
+      stems:['What are the main parts of ____, and how is each part shaped for the job it does?',
+             'How are the parts of ____ connected to each other to make it work?'] },
+    { name:'Connection', hint:'Connection is about how parts or things link to and affect each other.',
+      stems:['How does the shape of ____ connect to the job it does?',
+             'How is the structure of ____ similar to or different from a system that does a similar job?'] }
+  ],
+  b: [
+    { name:'Function', hint:'Function is about the job something does and how it does it.',
+      stems:['What steps does ____ go through to do its job?',
+             'How does ____ change while it is doing its job?'] },
+    { name:'Causation', hint:'Causation is about why something happens and what causes it.',
+      stems:['What causes ____ to speed up, slow down, start or stop?',
+             'Why does ____ need to work the way it does?'] }
+  ],
+  c: [
+    { name:'Connection', hint:'Connection is about how systems rely on and affect each other.',
+      stems:['How does ____ depend on ____ to do its job?',
+             'How are ____ and ____ connected to each other?'] },
+    { name:'Causation', hint:'Causation is about why something happens and what causes it.',
+      stems:['What would happen to ____ if ____ stopped working?',
+             'Why does ____ need help from other body systems to do its job?'] }
+  ]
+};
+
+const QUESTION_SLOTS = [
+  { type:'help', title:'Question 1 — with support', desc:'Pick a related concept, choose a starter, then edit it into your own question.' },
+  { type:'help', title:'Question 2 — with support', desc:'Try a different related concept this time, for a fresh angle on your role.' },
+  { type:'partner', title:'Question 3 — with a partner', desc:'No starters this time. Team up with someone and write an open-ended question together, using what you now know about strong research questions.' }
+];
+
+function fillStem(stem, groupName){
+  let used = false;
+  return stem.replace(/____/g, () => {
+    if(!used){ used = true; return groupName; }
+    return '____';
+  });
+}
+
+function questionHTML(){
+  const g = group();
+  const r = ROLES.find(x=>x.id===state.role);
+  return `
+    <p class="eyebrow">Stage 3 of 7 · Ask Your Question</p>
+    <h2 class="title">Build your research questions</h2>
+    <p class="lede">Your group's big question is <b>"${g.bigQ}"</b>. As the <b>${r.label}</b>, you'll build three open-ended questions about ${r.desc.toLowerCase()} Use a related concept to help each one along.</p>
+
+    ${QUESTION_SLOTS.map((slot,i) => questionSlotHTML(i, slot)).join('')}
+
+    <div class="hint">A strong question usually: needs more than one sentence to answer, connects to your related concept, and isn't answerable with a quick "yes" or "no".</div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" id="questionBack">&larr; Back</button>
+      <button class="btn btn-primary" id="questionNext" ${allQuestionsValid() ? '' : 'disabled'}>Start investigating &rarr;</button>
+    </div>
+  `;
+}
+
+function questionSlotHTML(i, slot){
+  const q = state.questions[i];
+  const concepts = RELATED_CONCEPTS[state.role];
+  const tips = questionTips(q.text);
+  const g = group();
+  const noSupport = slot.type === 'partner';
+  return `
+    <div class="skill-block" data-qslot="${i}">
+      <h3><span class="skill-num">${i+1}</span>${slot.title}</h3>
+      <p style="margin-bottom:${noSupport?'12px':'10px'};">${slot.desc}</p>
+      ${noSupport ? `
+        <div class="field" style="max-width:280px;">
+          <label class="field-label">Partner's name</label>
+          <input type="text" data-partner="${i}" value="${escapeAttr(q.partner||'')}" placeholder="Who are you working with?">
+        </div>` : `
+      <label class="field-label">Pick a related concept to build from</label>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+        ${concepts.map(c => `<button class="preset-btn ${q.concept===c.name?'active':''}" ${q.concept===c.name?`style="background:${g.color}; border-color:${g.color}; color:#fff;"`:''} data-conceptbtn="${i}" data-conceptname="${c.name}">${c.name}</button>`).join('')}
+      </div>
+      ${q.concept ? `
+        <p class="hint" style="margin-bottom:8px;">${concepts.find(c=>c.name===q.concept).hint}</p>
+        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:12px;">
+          ${concepts.find(c=>c.name===q.concept).stems.map(stem => `<button class="quiz-opt" data-stembtn="${i}" data-stem="${escapeAttr(stem)}">${fillStem(stem, 'the '+g.name.toLowerCase())}</button>`).join('')}
+        </div>` : ''}
+      `}
+
+      <div class="field" style="margin-bottom:0;">
+        <label class="field-label">My question ${i+1}</label>
+        <textarea data-qtext="${i}" rows="2" placeholder="${noSupport ? 'Write your own open-ended question together \u2014 no starters this time.' : 'Write or edit your open-ended question here...'}">${escapeHTML(q.text)}</textarea>
+        <div data-qtips="${i}">${tips.length ? `<div class="warn-banner">${tips.join('<br>')}</div>` : (q.text.trim().length>0 ? `<div class="callout">Looks like a solid, open-ended question.</div>` : '')}</div>
+      </div>
+    </div>
+  `;
+}
+
+function allQuestionsValid(){
+  return state.questions.every((q,i) => {
+    const lengthOk = q.text.trim().length >= 10;
+    const partnerOk = QUESTION_SLOTS[i].type !== 'partner' || (q.partner && q.partner.trim().length > 0);
+    return lengthOk && partnerOk;
+  });
+}
+
+function questionTips(q){
+  const tips = [];
+  const trimmed = (q||'').trim();
+  if(trimmed.length === 0) return tips;
+  const first = trimmed.split(' ')[0].toLowerCase().replace(/[^a-z]/g,'');
+  if(['is','are','do','does','can','will','was','were'].includes(first)){
+    tips.push("This starts like a yes/no question — try starting with <b>how</b> or <b>why</b> instead.");
+  }
+  if(trimmed.length < 15){
+    tips.push("This looks quite short — add more detail so it's clear exactly what you're investigating.");
+  }
+  return tips;
+}
+
+/* ============ STAGE: INVESTIGATE ============ */
+function investigateHTML(){
+  const goal = 5;
+  const pct = Math.min(100, Math.round((state.facts.length/goal)*100));
+  return `
+    <p class="eyebrow">Stage 4 of 7 · Investigate</p>
+    <h2 class="title">Research time</h2>
+    <p class="lede">Set the clock, go find information, and log each fact in your own words as you go. Aim for at least ${goal} facts before you check your evidence.</p>
+
+    ${timerPanelHTML('investigate', [10,15,20,25])}
+
+    <hr class="rule">
+    <h3 style="font-family:'Bitter',serif; font-size:1.05rem; margin:0 0 4px;">Log a fact</h3>
+    <p class="hint" style="margin-bottom:14px;">Fill this in every time you find something worth keeping.</p>
+
+    <div class="field-row two">
+      <div class="field">
+        <label class="field-label" for="srcTitle">Source title</label>
+        <input type="text" id="srcTitle" placeholder="e.g. Kids Health: The Heart">
+      </div>
+      <div class="field">
+        <label class="field-label" for="srcAuthor">Author / organisation</label>
+        <input type="text" id="srcAuthor" placeholder="e.g. Nemours KidsHealth">
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label" for="srcDate">Date / year</label>
+      <input type="text" id="srcDate" placeholder="e.g. 2024" style="max-width:180px;">
+    </div>
+    <div class="field">
+      <label class="field-label" for="factText">The fact — in your own words</label>
+      <textarea id="factText" rows="3" placeholder="Write what you learned as if you were explaining it to a friend."></textarea>
+      <div id="pasteWarning"></div>
+    </div>
+
+    <div class="nav-row" style="margin-top:0;">
+      <span></span>
+      <button class="btn btn-primary btn-small" id="addFactBtn">Add fact</button>
+    </div>
+
+    <hr class="rule">
+    <div class="progress-label">${state.facts.length} of ${goal} facts logged</div>
+    <div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${pct}%"></div></div>
+
+    <div id="factList" style="margin-top:16px;">
+      ${state.facts.length === 0 ? `<p class="hint">No facts logged yet — your notes will appear here.</p>` : state.facts.map(factCardHTML).join('')}
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" id="investigateBack">&larr; Back</button>
+      <button class="btn btn-primary" id="investigateNext">Check my evidence &rarr;</button>
+    </div>
+  `;
+}
+
+function factRelevanceLevel(f){
+  const n = (f.r1?1:0)+(f.r2?1:0)+(f.r3?1:0);
+  if(n===3) return 'green';
+  if(n>=1) return 'amber';
+  return 'gray';
+}
+
+function factCardHTML(f){
+  const lvl = factRelevanceLevel(f);
+  return `
+    <div class="fact-card" data-fact="${f.id}">
+      <div class="fc-top">
+        <div style="display:flex; gap:8px;">
+          <span class="status-dot ${lvl}"></span>
+          <div>
+            <div class="fc-source">${escapeHTML(f.title||'Untitled source')}${f.author?' · '+escapeHTML(f.author):''}${f.date?' · '+escapeHTML(f.date):''}</div>
+          </div>
+        </div>
+        <button class="fc-remove" data-remove="${f.id}">remove</button>
+      </div>
+      <div class="fc-text">${escapeHTML(f.text)}</div>
+      <div class="rel-checks">
+        <label><input type="checkbox" data-fact="${f.id}" data-rel="r1" ${f.r1?'checked':''}> Answers my question</label>
+        <label><input type="checkbox" data-fact="${f.id}" data-rel="r2" ${f.r2?'checked':''}> Found in another source too</label>
+        <label><input type="checkbox" data-fact="${f.id}" data-rel="r3" ${f.r3?'checked':''}> Source has author &amp; date</label>
+      </div>
+    </div>
+  `;
+}
+
+/* ============ STAGE: CHECK ============ */
+function checkHTML(){
+  const allChecked = GATE_ITEMS.every((_,i)=>state.gate[i]);
+  const needsWork = state.facts.filter(f => factRelevanceLevel(f) !== 'green');
+  return `
+    <p class="eyebrow">Stage 5 of 7 · Check Your Evidence</p>
+    <h2 class="title">Are you really done researching?</h2>
+    <p class="lede">Look back over your facts, then be honest with the checklist below — it's the same one real researchers in this class use.</p>
+
+    ${state.facts.length === 0 ? `<div class="warn-banner">You haven't logged any facts yet. Go back to Investigate first.</div>` : `
+      <div class="progress-label">${state.facts.length - needsWork.length} of ${state.facts.length} facts fully checked</div>
+      <div style="margin-top:10px; margin-bottom:18px;">
+        ${state.facts.map(factCardHTML).join('')}
+      </div>
+    `}
+
+    <hr class="rule">
+    <h3 style="font-family:'Bitter',serif; font-size:1.05rem; margin:0 0 10px;">How do I know I'm done researching?</h3>
+    <ul class="gate-list">
+      ${GATE_ITEMS.map((item,i)=>`
+        <li><input type="checkbox" data-gate="${i}" ${state.gate[i]?'checked':''}> <span>${item}</span></li>
+      `).join('')}
+    </ul>
+
+    ${!allChecked ? `<div class="warn-banner">It's okay if you're not there yet — that's what this checklist is for. Go back and investigate a little more before you build your summary.</div>` : `<div class="callout">Great work — you're ready to build your summary.</div>`}
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" id="checkBack">&larr; Back to investigate</button>
+      <button class="btn btn-primary" id="checkNext" ${allChecked ? '' : 'disabled'}>Build my summary &rarr;</button>
+    </div>
+  `;
+}
+
+/* ============ STAGE: SUMMARIZE ============ */
+function summarizeHTML(){
+  const greenFacts = state.facts.filter(f => factRelevanceLevel(f)==='green');
+  return `
+    <p class="eyebrow">Stage 6 of 7 · Build Your Summary</p>
+    <h2 class="title">Turn your evidence into a summary — no copy-paste</h2>
+    <p class="lede">You have a time limit for this part, just like the real presentation deadline. Read your evidence bank below, then write your summary in your own words. You can't copy out of the bank — that's the whole point.</p>
+
+    ${timerPanelHTML('summarize', [8,10,15,20])}
+
+    <hr class="rule">
+    <h3 style="font-family:'Bitter',serif; font-size:1.05rem; margin:0 0 8px;">Your evidence bank</h3>
+    <div class="evidence-bank" id="evidenceBank" oncopy="return false" oncontextmenu="return false" onselectstart="return false">
+      ${greenFacts.length === 0 ? `<p>No fully-checked facts yet — go back and check your evidence.</p>` : greenFacts.map(f=>`<div class="eb-item"><b>${escapeHTML(f.title||'Source')}</b> (${escapeHTML(f.author||'unknown')}${f.date?', '+escapeHTML(f.date):''}) — ${escapeHTML(f.text)}</div>`).join('')}
+    </div>
+    <p class="hint" style="margin-bottom:20px;">Copying is switched off here. Read it, close your eyes for a second, then write it below in your own words.</p>
+
+    <div class="field">
+      <label class="field-label" for="summaryText">My summary for the presentation</label>
+      <textarea id="summaryText" rows="6" placeholder="Write a short summary of what you found, in your own words, ready to turn into your artifact.">${escapeHTML(state.summaryText)}</textarea>
+      <div id="summaryPasteWarning"></div>
+    </div>
+
+    <h3 style="font-family:'Bitter',serif; font-size:1.05rem; margin:18px 0 8px;">Add 1&ndash;2 images</h3>
+    <p class="hint" style="margin-bottom:12px;">Choose images that show your system's structure or function, and note exactly where each one is from.</p>
+    ${state.images.map((img,i)=>`
+      <div class="field-row two" style="margin-bottom:10px;">
+        <div class="field" style="margin-bottom:0;">
+          <label class="field-label">Image ${i+1} — what it shows</label>
+          <input type="text" data-img="${i}" data-imgfield="desc" value="${escapeAttr(img.desc)}" placeholder="e.g. Diagram of the heart's four chambers">
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label class="field-label">Image ${i+1} — source / credit</label>
+          <input type="text" data-img="${i}" data-imgfield="source" value="${escapeAttr(img.source)}" placeholder="e.g. KidsHealth.org, 2024">
+        </div>
+      </div>
+    `).join('')}
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" id="summarizeBack">&larr; Back</button>
+      <button class="btn btn-primary" id="summarizeNext" ${state.summaryText.trim().length>=20 ? '' : 'disabled'}>I'm ready to present &rarr;</button>
+    </div>
+  `;
+}
+
+/* ============ STAGE: READY ============ */
+function readyHTML(){
+  const g = group();
+  const r = ROLES.find(x=>x.id===state.role);
+  const greenFacts = state.facts.filter(f=>factRelevanceLevel(f)==='green');
+  return `
+    <p class="eyebrow">Stage 7 of 7 · Ready to Present</p>
+    <h2 class="title">Your research is ready</h2>
+    <p class="lede">Here's everything you've gathered. Download it to keep alongside your artifact, or head back to tidy anything up.</p>
+
+    <div class="recap-grid">
+      <div class="recap-block">
+        <h4>Expert group &amp; role</h4>
+        <p><span class="tag-badge" style="--card-accent:${g.color}">${g.name}</span></p>
+        <p style="margin-top:6px;">${r.label}</p>
+      </div>
+      <div class="recap-block">
+        <h4>Research questions</h4>
+        <div>${state.questions.map((q,i)=>`${i+1}. ${escapeHTML(q.text)}${QUESTION_SLOTS[i].type==='partner' && q.partner ? ` <span class="hint">(with ${escapeHTML(q.partner)})</span>` : ''}`).join('<br>')}</div>
+      </div>
+      <div class="recap-block">
+        <h4>Checked facts</h4>
+        <p>${greenFacts.length} fully-checked facts, ${state.facts.length} logged in total</p>
+      </div>
+      <div class="recap-block">
+        <h4>Images</h4>
+        <div>${state.images.filter(im=>im.desc).map(im=>`${escapeHTML(im.desc)} — ${escapeHTML(im.source||'no source noted')}`).join('<br>') || 'None added'}</div>
+      </div>
+    </div>
+
+    <div class="recap-block" style="margin-bottom:20px;">
+      <h4>Summary</h4>
+      <p>${escapeHTML(state.summaryText)}</p>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" id="readyBack">&larr; Back</button>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-ghost" id="resetBtn">Start a new investigation</button>
+        <button class="btn btn-primary" id="downloadBtn">Download my research notes</button>
+      </div>
+    </div>
+  `;
+}
+
+/* ============ TIMER ============ */
+function timerPanelHTML(context, presets){
+  const t = state.timer;
+  const isThis = t.context === context;
+  const remaining = isThis ? t.remaining : (presets[0]*60);
+  const mins = String(Math.floor(remaining/60)).padStart(2,'0');
+  const secs = String(remaining%60).padStart(2,'0');
+  let displayClass = '';
+  if(isThis && t.running && remaining <= 30 && remaining > 0) displayClass = 'urgent';
+  if(isThis && remaining === 0 && t.total>0) displayClass = 'done';
+  return `
+    <div class="timer-panel" data-timer-context="${context}">
+      <div class="preset-row">
+        ${presets.map(p => `<button class="preset-btn ${isThis && t.total === p*60 && !t.running && t.remaining===t.total ? 'active':''}" data-preset="${p}" data-context="${context}">${p} min</button>`).join('')}
+      </div>
+      <div class="timer-display ${displayClass}">${mins}:${secs}</div>
+      <div class="timer-controls">
+        <button class="btn btn-primary btn-small" data-timerstart="${context}">${isThis && t.running ? 'Pause' : (isThis && t.remaining < t.total ? 'Resume' : 'Start')}</button>
+        <button class="btn btn-ghost btn-small" data-timerreset="${context}">Reset</button>
+      </div>
+      <div class="timer-note">${isThis && remaining===0 && t.total>0 ? "Time's up! Wrap up and move on when you're ready." : 'Pick a length, then start the clock.'}</div>
+    </div>
+  `;
+}
+
+function ensureAudio(){
+  if(!audioCtx){
+    try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
+  }
+}
+
+function playChime(){
+  if(!audioCtx) return;
+  const now = audioCtx.currentTime;
+  [0,0.18,0.36].forEach((offset,i)=>{
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.frequency.value = i===2 ? 880 : 660;
+    gain.gain.setValueAtTime(0.0001, now+offset);
+    gain.gain.exponentialRampToValueAtTime(0.15, now+offset+0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now+offset+0.3);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(now+offset);
+    osc.stop(now+offset+0.32);
+  });
+}
+
+function timerTick(){
+  const t = state.timer;
+  if(t.remaining > 0){
+    t.remaining -= 1;
+    updateTimerDisplayOnly();
+    if(t.remaining === 0){
+      t.running = false;
+      clearInterval(t.intervalId);
+      playChime();
+      render();
+    }
+  }
+}
+
+function updateTimerDisplayOnly(){
+  // light-weight update without full re-render, to avoid disrupting focus on inputs
+  const t = state.timer;
+  document.querySelectorAll(`[data-timer-context="${t.context}"] .timer-display`).forEach(el=>{
+    const mins = String(Math.floor(t.remaining/60)).padStart(2,'0');
+    const secs = String(t.remaining%60).padStart(2,'0');
+    el.textContent = `${mins}:${secs}`;
+    el.classList.toggle('urgent', t.running && t.remaining<=30 && t.remaining>0);
+  });
+}
+
+function startTimer(context, minutesIfNew){
+  ensureAudio();
+  const t = state.timer;
+  if(t.context !== context){
+    t.context = context;
+    t.total = minutesIfNew*60;
+    t.remaining = minutesIfNew*60;
+  }
+  if(t.running){
+    t.running = false;
+    clearInterval(t.intervalId);
+  } else {
+    if(t.remaining <= 0) return;
+    t.running = true;
+    t.intervalId = setInterval(timerTick, 1000);
+  }
+  render();
+}
+
+function resetTimer(context, minutes){
+  const t = state.timer;
+  clearInterval(t.intervalId);
+  t.context = context;
+  t.total = minutes*60;
+  t.remaining = minutes*60;
+  t.running = false;
+  render();
+}
+
+/* ============ UTIL ============ */
+function escapeHTML(str){
+  return (str||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escapeAttr(str){ return escapeHTML(str); }
+
+/* ============ EVENT ATTACHMENT ============ */
+function attachStageEvents(id){
+  if(id === 'brief'){
+    document.querySelectorAll('#groupGrid [data-group]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ state.group = btn.dataset.group; render(); });
+    });
+    document.querySelectorAll('#roleGrid [data-role]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{ state.role = btn.dataset.role; render(); });
+    });
+    const next = document.getElementById('briefNext');
+    if(next) next.addEventListener('click', ()=> goTo(1));
+  }
+
+  else if(id === 'learn'){
+    document.querySelectorAll('.quiz-opt').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const skillIdx = parseInt(btn.dataset.skill,10);
+        if(state.quizAnswered[skillIdx] !== undefined) return;
+        state.quizAnswered[skillIdx] = parseInt(btn.dataset.opt,10);
+        render();
+      });
+    });
+    document.getElementById('learnBack').addEventListener('click', ()=> goTo(0));
+    document.getElementById('learnNext').addEventListener('click', ()=> goTo(2));
+  }
+
+  else if(id === 'question'){
+    document.querySelectorAll('[data-conceptbtn]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const i = parseInt(btn.dataset.conceptbtn,10);
+        state.questions[i].concept = btn.dataset.conceptname;
+        render();
+      });
+    });
+    document.querySelectorAll('[data-stembtn]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const i = parseInt(btn.dataset.stembtn,10);
+        state.questions[i].text = fillStem(btn.dataset.stem, 'the '+group().name.toLowerCase());
+        render();
+      });
+    });
+    document.querySelectorAll('[data-partner]').forEach(inp=>{
+      inp.addEventListener('input', ()=>{
+        const i = parseInt(inp.dataset.partner,10);
+        state.questions[i].partner = inp.value;
+        document.getElementById('questionNext').disabled = !allQuestionsValid();
+      });
+    });
+    document.querySelectorAll('[data-qtext]').forEach(ta=>{
+      ta.addEventListener('input', ()=>{
+        const i = parseInt(ta.dataset.qtext,10);
+        state.questions[i].text = ta.value;
+        const tips = questionTips(ta.value);
+        const tipsHolder = document.querySelector(`[data-qtips="${i}"]`);
+        tipsHolder.innerHTML = tips.length ? `<div class="warn-banner">${tips.join('<br>')}</div>` : (ta.value.trim().length>0 ? `<div class="callout">Looks like a solid, open-ended question.</div>` : '');
+        document.getElementById('questionNext').disabled = !allQuestionsValid();
+      });
+    });
+    document.getElementById('questionBack').addEventListener('click', ()=> goTo(1));
+    document.getElementById('questionNext').addEventListener('click', ()=> goTo(3));
+  }
+
+  else if(id === 'investigate'){
+    attachTimerEvents('investigate', [10,15,20,25]);
+
+    const factText = document.getElementById('factText');
+    let pasteFlagged = false;
+    factText.addEventListener('paste', (e)=>{
+      const pasted = (e.clipboardData || window.clipboardData).getData('text');
+      if(pasted && pasted.trim().length > 15){
+        pasteFlagged = true;
+        factText.classList.add('flagged');
+        document.getElementById('pasteWarning').innerHTML = `
+          <div class="warn-banner">That looks pasted straight from a source. Rewrite it in your own words before adding it.
+          <div class="check-row"><input type="checkbox" id="pasteConfirm"> <label for="pasteConfirm">I've reworded this fact in my own words</label></div></div>`;
+      }
+    });
+    factText.addEventListener('input', ()=>{
+      if(!pasteFlagged){
+        factText.classList.remove('flagged');
+      }
+    });
+
+    document.getElementById('addFactBtn').addEventListener('click', ()=>{
+      const text = factText.value.trim();
+      if(text.length < 5) return;
+      if(pasteFlagged){
+        const confirmBox = document.getElementById('pasteConfirm');
+        if(!confirmBox || !confirmBox.checked){
+          document.getElementById('pasteWarning').querySelector('.warn-banner').style.borderColor = 'var(--bad)';
+          return;
+        }
+      }
+      state.facts.push({
+        id: factIdCounter++,
+        title: document.getElementById('srcTitle').value.trim(),
+        author: document.getElementById('srcAuthor').value.trim(),
+        date: document.getElementById('srcDate').value.trim(),
+        text, r1:false, r2:false, r3:false
+      });
+      pasteFlagged = false;
+      render();
+    });
+
+    document.querySelectorAll('[data-remove]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        state.facts = state.facts.filter(f=>f.id !== parseInt(btn.dataset.remove,10));
+        render();
+      });
+    });
+    document.querySelectorAll('[data-rel]').forEach(cb=>{
+      cb.addEventListener('change', ()=>{
+        const f = state.facts.find(x=>x.id===parseInt(cb.dataset.fact,10));
+        f[cb.dataset.rel] = cb.checked;
+        render();
+      });
+    });
+
+    document.getElementById('investigateBack').addEventListener('click', ()=> goTo(2));
+    document.getElementById('investigateNext').addEventListener('click', ()=> goTo(4));
+  }
+
+  else if(id === 'check'){
+    document.querySelectorAll('[data-rel]').forEach(cb=>{
+      cb.addEventListener('change', ()=>{
+        const f = state.facts.find(x=>x.id===parseInt(cb.dataset.fact,10));
+        f[cb.dataset.rel] = cb.checked;
+        render();
+      });
+    });
+    document.querySelectorAll('[data-gate]').forEach(cb=>{
+      cb.addEventListener('change', ()=>{
+        state.gate[parseInt(cb.dataset.gate,10)] = cb.checked;
+        render();
+      });
+    });
+    document.getElementById('checkBack').addEventListener('click', ()=> goTo(3));
+    const next = document.getElementById('checkNext');
+    if(next) next.addEventListener('click', ()=> goTo(5));
+  }
+
+  else if(id === 'summarize'){
+    attachTimerEvents('summarize', [8,10,15,20]);
+
+    const summaryText = document.getElementById('summaryText');
+    let pasteFlagged = false;
+    summaryText.addEventListener('paste', (e)=>{
+      const pasted = (e.clipboardData || window.clipboardData).getData('text');
+      if(pasted && pasted.trim().length > 15){
+        pasteFlagged = true;
+        summaryText.classList.add('flagged');
+        document.getElementById('summaryPasteWarning').innerHTML = `
+          <div class="warn-banner">That looks pasted. Rewrite this part in your own words — remember, copy-paste is switched off for this task.
+          <div class="check-row"><input type="checkbox" id="summaryPasteConfirm"> <label for="summaryPasteConfirm">I've reworded this in my own words</label></div></div>`;
+      }
+    });
+    summaryText.addEventListener('input', ()=>{
+      state.summaryText = summaryText.value;
+      const btn = document.getElementById('summarizeNext');
+      const confirmBox = document.getElementById('summaryPasteConfirm');
+      const blocked = pasteFlagged && (!confirmBox || !confirmBox.checked);
+      btn.disabled = state.summaryText.trim().length < 20 || blocked;
+    });
+
+    document.querySelectorAll('[data-img]').forEach(inp=>{
+      inp.addEventListener('input', ()=>{
+        state.images[parseInt(inp.dataset.img,10)][inp.dataset.imgfield] = inp.value;
+      });
+    });
+
+    document.getElementById('summarizeBack').addEventListener('click', ()=> goTo(4));
+    document.getElementById('summarizeNext').addEventListener('click', ()=> goTo(6));
+  }
+
+  else if(id === 'ready'){
+    document.getElementById('readyBack').addEventListener('click', ()=> goTo(5));
+    document.getElementById('downloadBtn').addEventListener('click', downloadNotes);
+    document.getElementById('resetBtn').addEventListener('click', ()=>{
+      if(confirm('This will clear your current investigation. Start over?')){
+        clearInterval(state.timer.intervalId);
+        state = {
+          stageIndex:0, maxReached:0, group:null, role:null,
+          questions:[{text:'',concept:null,partner:''},{text:'',concept:null,partner:''},{text:'',concept:null,partner:''}],
+          quizAnswered:{}, facts:[], gate:{}, timer:{total:0,remaining:0,running:false,intervalId:null,context:''},
+          summaryText:'', summaryPasteFlag:false, summaryConfirmed:false,
+          images:[{desc:'',source:''},{desc:'',source:''}]
+        };
+        render();
+      }
+    });
+  }
+}
+
+function attachTimerEvents(context, presets){
+  document.querySelectorAll(`[data-preset][data-context="${context}"]`).forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const mins = parseInt(btn.dataset.preset,10);
+      resetTimer(context, mins);
+    });
+  });
+  const startBtn = document.querySelector(`[data-timerstart="${context}"]`);
+  if(startBtn) startBtn.addEventListener('click', ()=> startTimer(context, presets[0]));
+  const resetBtn = document.querySelector(`[data-timerreset="${context}"]`);
+  if(resetBtn) resetBtn.addEventListener('click', ()=>{
+    const mins = state.timer.context===context && state.timer.total>0 ? state.timer.total/60 : presets[0];
+    resetTimer(context, mins);
+  });
+}
+
+/* ============ DOWNLOAD ============ */
+function downloadNotes(){
+  const g = group();
+  const r = ROLES.find(x=>x.id===state.role);
+  const greenFacts = state.facts.filter(f=>factRelevanceLevel(f)==='green');
+  const lines = [];
+  lines.push('FINDING OUT — RESEARCH NOTES');
+  lines.push('='.repeat(40));
+  lines.push(`Expert group: ${g ? g.name : ''}`);
+  lines.push(`Role: ${r ? r.label : ''}`);
+  lines.push(`Group big question: ${g ? g.bigQ : ''}`);
+  lines.push('My research questions:');
+  state.questions.forEach((q,i)=>{
+    lines.push(`  ${i+1}. ${q.text}${QUESTION_SLOTS[i].type==='partner' && q.partner ? ` (with ${q.partner})` : ''}`);
+  });
+  lines.push('');
+  lines.push('FACTS');
+  lines.push('-'.repeat(40));
+  state.facts.forEach((f,i)=>{
+    lines.push(`${i+1}. ${f.text}`);
+    lines.push(`   Source: ${f.title || 'untitled'} — ${f.author || 'unknown author'}${f.date ? ', '+f.date : ''}`);
+    lines.push(`   Fully checked: ${factRelevanceLevel(f)==='green' ? 'yes' : 'no'}`);
+    lines.push('');
+  });
+  lines.push(`Fully-checked facts used in summary: ${greenFacts.length} of ${state.facts.length}`);
+  lines.push('');
+  lines.push('SUMMARY');
+  lines.push('-'.repeat(40));
+  lines.push(state.summaryText || '(not written yet)');
+  lines.push('');
+  lines.push('IMAGES');
+  lines.push('-'.repeat(40));
+  state.images.forEach((img,i)=>{
+    if(img.desc) lines.push(`${i+1}. ${img.desc} — ${img.source || 'no source noted'}`);
+  });
+  const blob = new Blob([lines.join('\n')], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `finding-out-notes-${g ? g.id : 'notes'}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ============ INIT ============ */
+render();
+</script>
+</body>
+</html>
